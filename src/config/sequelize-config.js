@@ -1,38 +1,30 @@
+// sequelize-config.js
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Configuración de conexión desde .env
+// Configuración básica desde .env
 const dbConfig = {
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 3306,
   dialect: process.env.DB_DIALECT || 'mysql',
-  logging: false,
+  logging: false, // desactiva logs SQL
+  dialectOptions: { ssl: { rejectUnauthorized: true } }, // para Railway con SSL
 };
 
-// Soporte para URL completa de Railway (opcional)
-const connectionUrl = process.env.DATABASE_URL || null;
+// Usar URL completa si está definida
+const connectionUrl = process.env.DB_URL;
 
 let sequelize;
 if (connectionUrl) {
-  sequelize = new Sequelize(connectionUrl, {
-    dialect: dbConfig.dialect,
-    logging: dbConfig.logging,
-    dialectOptions: { ssl: { rejectUnauthorized: true } },
-  });
+  sequelize = new Sequelize(connectionUrl, dbConfig);
 } else {
+  // fallback a variables separadas
   sequelize = new Sequelize(
-    dbConfig.database,
-    dbConfig.username,
-    dbConfig.password,
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
     {
-      host: dbConfig.host,
-      port: dbConfig.port,
-      dialect: dbConfig.dialect,
-      logging: dbConfig.logging,
-      dialectOptions: { ssl: { rejectUnauthorized: true } },
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT || 3306,
+      ...dbConfig,
     }
   );
 }
