@@ -2,16 +2,12 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize-config');
 
 const Enrollment = sequelize.define('Enrollment', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
+  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   estudianteId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'users',
+      model: 'Users', // 👈 coincide con tableName del modelo User
       key: 'id',
     },
   },
@@ -19,23 +15,16 @@ const Enrollment = sequelize.define('Enrollment', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'courses',
+      model: 'Courses', // 👈 coincide con tableName del modelo Course
       key: 'id',
     },
   },
-  fecha: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
+  fecha: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
 }, {
   tableName: 'Enrollments',
   timestamps: true,
   indexes: [
-    {
-      unique: true,
-      fields: ['estudianteId', 'courseId']
-    }
+    { unique: true, fields: ['estudianteId', 'courseId'] }
   ]
 });
 

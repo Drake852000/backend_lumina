@@ -1,5 +1,4 @@
-const { sequelize } = require('../config/sequelize-config');
-
+const sequelize = require('../config/sequelize-config');
 const User = require('./User');
 const Course = require('./Course');
 const Enrollment = require('./Enrollment');
@@ -9,7 +8,7 @@ const StudyLog = require('./StudyLog');
 const AiRecommendation = require('./AiRecommendation');
 
 /* ================================
-   1. USER ASSOCIATIONS
+// USER ASSOCIATIONS
 ================================ */
 
 // Un profesor imparte varios cursos
@@ -21,18 +20,8 @@ User.hasMany(Enrollment, { foreignKey: 'estudianteId', as: 'Matriculas' });
 Enrollment.belongsTo(User, { foreignKey: 'estudianteId', as: 'Estudiante' });
 
 // Acceso directo a los cursos de un estudiante a través de Enrollment
-User.belongsToMany(Course, {
-  through: Enrollment,
-  foreignKey: 'estudianteId',
-  otherKey: 'courseId',
-  as: 'Cursos',
-});
-Course.belongsToMany(User, {
-  through: Enrollment,
-  foreignKey: 'courseId',
-  otherKey: 'estudianteId',
-  as: 'Estudiantes',
-});
+User.belongsToMany(Course, { through: Enrollment, foreignKey: 'estudianteId', otherKey: 'courseId', as: 'Cursos' });
+Course.belongsToMany(User, { through: Enrollment, foreignKey: 'courseId', otherKey: 'estudianteId', as: 'Estudiantes' });
 
 // Un estudiante tiene varias entregas
 User.hasMany(Submission, { foreignKey: 'estudianteId', as: 'Entregas' });
@@ -46,9 +35,8 @@ StudyLog.belongsTo(User, { foreignKey: 'estudianteId', as: 'Estudiante' });
 User.hasMany(AiRecommendation, { foreignKey: 'estudianteId', as: 'RecomendacionesIA' });
 AiRecommendation.belongsTo(User, { foreignKey: 'estudianteId', as: 'Estudiante' });
 
-
 /* ================================
-   2. COURSE ASSOCIATIONS
+// COURSE ASSOCIATIONS
 ================================ */
 
 // Un curso tiene varias matrículas
@@ -59,18 +47,16 @@ Enrollment.belongsTo(Course, { foreignKey: 'courseId', as: 'Curso' });
 Course.hasMany(Task, { foreignKey: 'courseId', as: 'Tareas' });
 Task.belongsTo(Course, { foreignKey: 'courseId', as: 'Curso' });
 
-
 /* ================================
-   3. TASK ASSOCIATIONS
+// TASK ASSOCIATIONS
 ================================ */
 
 // Una tarea tiene varias entregas
 Task.hasMany(Submission, { foreignKey: 'taskId', as: 'Entregas' });
 Submission.belongsTo(Task, { foreignKey: 'taskId', as: 'Tarea' });
 
-
 /* ================================
-   EXPORTAR MODELOS Y SEQUELIZE
+// EXPORTAR MODELOS Y SEQUELIZE
 ================================ */
 module.exports = {
   sequelize,

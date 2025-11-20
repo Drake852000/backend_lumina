@@ -5,18 +5,22 @@ require('dotenv').config();
 // Configuración básica desde .env
 const dbConfig = {
   dialect: process.env.DB_DIALECT || 'mysql',
-  logging: false, // desactiva logs SQL
-  dialectOptions: { ssl: { rejectUnauthorized: true } }, // para Railway con SSL
+  logging: false, // quiet mode
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false // ← FIX IMPORTANTE
+    }
+  }
 };
 
-// Usar URL completa si está definida
 const connectionUrl = process.env.DB_URL;
 
 let sequelize;
+
 if (connectionUrl) {
   sequelize = new Sequelize(connectionUrl, dbConfig);
 } else {
-  // fallback a variables separadas
   sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
