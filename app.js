@@ -87,23 +87,35 @@ app.use((err, req, res, next) => {
 });
 
 // =======================
-// Iniciar servidor + DB
+// Iniciar servidor + DB con retry
 // =======================
-async function startServer() {
-  try {
-    await sequelize.authenticate();
-    console.log('Conexión a la base de datos establecida correctamente.');
-    await sequelize.sync({ alter: false });
-    console.log('Tablas sincronizadas correctamente.');
+async function startServer(retries = 10, delay = 5000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await sequelize.authenticate();
+      console.log('Conexión a la base de datos establecida correctamente.');
+      await sequelize.sync({ alter: false });
+      console.log('Tablas sincronizadas correctamente.');
 
-    app.listen(config.port, () => {
-      console.log(`Servidor backend corriendo en http://localhost:${config.port} (modo ${config.env})`);
-    });
-  } catch (error) {
-    console.error('❌ No se pudo conectar a la base de datos:', error);
-    process.exit(1);
+      app.listen(config.port, () => {
+        console.log(`Servidor backend corriendo en http://localhost:${config.port} (modo ${config.env})`);
+      });
+
+      return; // todo listo, salimos del loop
+    } catch (error) {
+      console.error(`❌ No se pudo conectar a la base de datos. Intento ${i + 1} de ${retries}`);
+      console.error(error.message);
+      if (i < retries - 1) {
+        console.log(`Reintentando en ${delay / 1000} segundos...`);
+        await new Promise(res => setTimeout(res, delay));
+      } else {
+        console.error('💀 No se pudo conectar a la base de datos después de varios intentos.');
+        process.exit(1);
+      }
+    }
   }
 }
 
 startServer();
+
 module.exports = app;
